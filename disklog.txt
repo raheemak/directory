@@ -1,0 +1,27 @@
+DISK: Logging enabled to disklog.txt
+DISK: block size 5 number of blocks 10
+DISK: Write to block 0
+DISK: Write to block 1
+DISK: Write to block 2
+DISK: Write to block 3
+DISK: Write to block 4
+DISK: Write to block 5
+DISK: Write to block 6
+DISK: Write to block 7
+DISK: Read to block 2
+DISK: Write to block 2
+DISK: block size 5 number of blocks 10
+DISK: Num reads 1 Num writes 9
+DISK: Blocks created were 8 of total 10 which is 80 %
+DISK: Read to block 0
+DISK: Read to block 1
+DISK: Read to block 2
+DISK: Read to block 3
+DISK: Read to block 4
+DISK: Read to block 5
+DISK: Read to block 6
+DISK: Read to block 7
+DISK: Read to block 8
+DISK: Read to block 9
+DISK: Terminating.
+DISK: Blocks created were 10 of total 10 which is 100 %
