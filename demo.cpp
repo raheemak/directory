@@ -86,7 +86,6 @@ void deleteFile (string file){
 		int temp;
        		myDisk.read(directory[file],myBuffer);
 		for (int x=0; x < myBlockSize; x++){
-			cout << "x: " << x <<endl;
 			if (myBuffer->indeces[x]==NULL){
 				temp = myBuffer->getIndex();
                         	myDisk.freeBlock(temp);
@@ -214,6 +213,7 @@ int writeFile (string file, int numchars, char* data){
 from file with this handle and returns these in buffer. Returns the number of characters
 actually read (might be less than numchars), or -1 if there is an error (e.g., no such handle)
 */
+int stats (string);
 int readFile(string file, int numchars, char *buffer){
 	char *temp;
 	int total=0;
@@ -221,7 +221,7 @@ int readFile(string file, int numchars, char *buffer){
                 cout << FILENOTFOUND;
                 return -1;
         }
-
+        //buffer = new char [stats(file)];
         DiskBlockType *myBuffer = new DiskBlockType(myBlockSize,true);
         int blockNo = directory[file];
         myDisk.read(directory[file],myBuffer);
@@ -239,7 +239,6 @@ int readFile(string file, int numchars, char *buffer){
 			}
                 }
         }
-
         return total;
 }
 
@@ -278,7 +277,7 @@ int stats (string file){
 vector<string> List(){
 	std::map<std::string, int>::iterator it = directory.begin();
 	vector<string> list;
-	cout << "\n-------Directory-------\n";
+	cout << "\n-------Directory-------\nFileName, Size\n------------\n";
 	while (it != directory.end()){
 		list.push_back(it->first);
 		cout << it->first<<": " << stats(it->first) << endl;
@@ -307,33 +306,15 @@ void printDisk(){
 }
 
 int main(int argc, char **argv){
-	
-	DiskBlockType *myBuffer = new DiskBlockType(myBlockSize, true); 
-	createFile ("filename");
-	createFile ("secondFile");
-	cout << writeFile ("filename", 5, "well the we will see if this works?n");
- 	cout << writeFile ("filename", 5, "and maybe it wont");
-	writeFile ("secondFile", 10, "&&&&&&&");
-	writeFile ("secondFile", 10, "++++flkmdlmgfjndkfjnl");
-	writeFile ("filename",  10, "heehe");
-	char* buffer = new char[10]; 
-	cout << readFile ("filename", 10, buffer);
-
-	//deleteFile ("filename");
-	//createFile ("thirdFile");
-	//writeFile ("thirsFile", 10,  "another name");
-	//myDisk.freeBlock(2);
-
-	List();
 
 	bool exit = false, debug, passed;
 	string command; 
 	string filename;
 	string data;
 	char* dataBuffer;
-	int bufferSize=-1; 
+	int bufferSize=myBlockSize * myDiskSize; 
 	cout << endl << endl << "------\nATOS FILE SYSTEM\n-----"<<endl;
-	cout << "Commands: CREATE/DELETE/READ/WRITE/LIST/STATS/HELP"<<endl;
+	cout << "Commands: CREATE/DELETE/EDIT/TYPE/DIR/HELP"<<endl;
 	
 	 cout << "Debug mode? This will print disk after each command you enter (Y/N):";
          while (command != "Y" && command != "N")
@@ -357,7 +338,7 @@ int main(int argc, char **argv){
                         cin >> command;
                         deleteFile(command);
 		}
-		else if (command == "WRITE"){
+		else if (command == "EDIT"){
 			cout << "File name: "; 
 			cin >> command; 
 			cout << "Data: "; 
@@ -367,30 +348,21 @@ int main(int argc, char **argv){
 		        if (passed)
 				dataBuffer = NULL;	
 		}
-		else if (command == "READ"){
+		else if (command == "TYPE"){
 			cout << "File name: "; 
-			cin >> command; 
-			while (bufferSize<0){
-				cout << "No. bits you would like to read: ";
-				cin >> bufferSize; 
-			}dataBuffer = new char[bufferSize];
+			cin >> command;
+		        dataBuffer = NULL; 
+			dataBuffer = new char[bufferSize];	
 			passed = (readFile (command, myBlockSize, dataBuffer)>=0);
-			cout << "passed: " << passed <<endl;	
 			if (passed){
 				for (int x=0; x < bufferSize; x++)
 				cout << dataBuffer[x];
 				cout << endl;
 				delete dataBuffer;// = NULL;
 			}
-			bufferSize = -1;
 		}
-		else if (command == "LIST"){
+		else if (command == "DIR"){
 			List();
-		}
-		else if (command == "STATS"){
-			cout << "File name: ";
-                        cin >> command;
-                        stats(command);
 		}
 		else if (command == "HELP"){
 		}
