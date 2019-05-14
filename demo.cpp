@@ -319,6 +319,45 @@ int main(int argc, char **argv){
 		}
 		cout <<endl;
    	}
+
+	bool exit = false, debug;
+	string command; 
+	string filename;
+
+
+	cout << endl << endl << "------\nATOS FILE SYSTEM\n-----"<<endl;
+	cout << "Commands: CREATE/DELETE/READ/WRITE/LIST/STATS/HELP"<<endl;
+	
+	while (!exit){
+		cout << "Please enter a command: "; 
+		cin >> command;
+		if (command == "EXIT" || command == "exit"){
+			cout << "Quitting..."<<endl;
+			exit = true;
+			break;
+		}
+		cout << "Debug mode? This will print disk after each command you enter (Y/N):"; 
+		while (command != "Y" || command != "N")
+			cin >> command; 
+		debug = (command == 'Y');
+		else if (command == "CREATE"){
+		}
+		else if (command == "DELETE"){
+		}
+		else if (command == "READ"){
+		}
+		else if (command == "WRITE"){
+		}
+		else if (command == "LIST"){
+		}
+		else if (command == "STATS"){
+		}
+		else if (command == "HELP"){
+		}
+		else {
+			cout << endl << "Please enter a valid command. Type 'HELP' for instructions."<<endl;
+		}
+	}
 }	
 
 
