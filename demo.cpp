@@ -25,7 +25,8 @@ DiskProcessType myDisk(myBlockSize,myDiskSize);
 std::map<std::string, int> directory;
 std::map<std::string, vector<int>> directory2;
 
-
+///////////helper functions 
+//(I couldn't figure out typecasting in C++
 char intToChar (int x){
 	char characters[] = "0123456789";
 	return characters [x];
@@ -60,7 +61,8 @@ char charToInt (char x){
 string MEMORYFULLMSG = "\nDirectory is full. Please delete a file and try again...\n";
 string FILENOTFOUND = "\nThe file you entered was not found. Please try again...\n";
 
-
+//Will create a file and allocate an index block on the disk.
+//Will also add file name to directory 
 void createFile (string file){
 	if (!freeSpace.hasFreeSpace())
 		cout << MEMORYFULLMSG;
@@ -68,11 +70,13 @@ void createFile (string file){
 		directory [file]= freeSpace.getNextBlock();
 		DiskBlockType *myBuffer = new DiskBlockType(myBlockSize, true);
 		myBuffer->setIndex (directory[file]);
-		cout << file << ": " << myBuffer->getIndex() <<endl;
 		myDisk.write (directory[file], myBuffer);
 	}
 }
 
+//Will delete file and will all of the space allocated to the file 
+//This includes index blocks and data blocks. 
+//Will also delete file from directory 
 void deleteFile (string file){
         if (directory.find (file)==directory.end())
                 cout << FILENOTFOUND;
@@ -130,6 +134,7 @@ int addBlock(string file){
 	return added;
 }
 
+//traverses index block and returns the next block to write to
 DiskBlockType* getCurrBlock(string file){
  	DiskBlockType *myBuffer = new DiskBlockType(myBlockSize,true);
 	int blockNo = directory[file];
@@ -150,14 +155,17 @@ DiskBlockType* getCurrBlock(string file){
 	return myBuffer->indeces[myBlockSize-1];
 }
 
-void writeFile (string file, char* data){
+/*int Write(in handle, int numchars, char *buffer); // writes numchars
+chars that are in buffer to the file with this handle. Returns the number actually written or
+-1 if there is an error.*/
+int writeFile (string file, int numchars, char* data){
 	bool memfull = false;
+	int index =0; // to traverse data string
 	if (directory.find (file)==directory.end())
 		cout << FILENOTFOUND;
 	else{
 	//get index block 
 		DiskBlockType *currentBlock = getCurrBlock(file);
-		int index =0;//to traverse data string
 		int offset=0;
 		int nextBlock;
 		for (;offset <myBlockSize; offset++){
@@ -172,14 +180,13 @@ void writeFile (string file, char* data){
 			else 
 				memfull = true;
 		}
-		bool endofstring;
+		bool endofstring=false;
 		while (!memfull){
-			while (offset < myBlockSize &&  data[index]!='\0'){
+			while (offset < myBlockSize &&  !endofstring){
 				currentBlock->data[offset]=data[index];
 				offset++;
 				index++;
-
-				endofstring = (data[index]=='\0');
+				endofstring = (data[index]=='\0' || index>=numchars);
 			}
 
 			if (endofstring)
@@ -193,14 +200,51 @@ void writeFile (string file, char* data){
 				continue;	
 			}
 			else{
+				return -1;
 				cout << MEMORYFULLMSG;
 				break;
 			}	
 		}
-	}	
+	}
+	return index;	
 }
 
 
+/*int Read(int handle, int numchars, char *buffer); // reads numchars
+from file with this handle and returns these in buffer. Returns the number of characters
+actually read (might be less than numchars), or -1 if there is an error (e.g., no such handle)
+*/
+int readFile(string file, int numchars, char *buffer){
+	char *temp;
+	int total=0;
+        if (directory.find (file)==directory.end()){
+                cout << FILENOTFOUND;
+                return -1;
+        }
+
+        DiskBlockType *myBuffer = new DiskBlockType(myBlockSize,true);
+        int blockNo = directory[file];
+        myDisk.read(directory[file],myBuffer);
+
+        for (int x=0; x < myBlockSize; x++){
+                if (myBuffer->indeces[x]==NULL)
+                        break;
+                else{
+                        temp=myBuffer->indeces[x]->data;
+                        int index=0;
+			while (temp[index]!='\0' && total<numchars){
+                                index++;
+				total++;
+				buffer[total]=temp[index];	
+			}
+                }
+        }
+
+        return total;
+}
+
+
+//Returns the size of the file passed
 int stats (string file){
 	int fileSize=0; 
 	char *temp;
@@ -228,9 +272,9 @@ int stats (string file){
 	}
 
 	return fileSize; 
-
 }
 
+// returns a list of all currently existing file names as stings
 vector<string> List(){
 	std::map<std::string, int>::iterator it = directory.begin();
 	vector<string> list;
@@ -248,22 +292,24 @@ int main(int argc, char **argv){
   	DiskBlockType *myBuffer = new DiskBlockType(myBlockSize, true); 
 	createFile ("filename");
 	createFile ("secondFile");
-	writeFile ("filename","well the we will see if this works?n");
- 	writeFile ("filename", "and maybe it wont");
-	writeFile ("secondFile", "&&&&&&&");
-	writeFile ("secondFile", "++++flkmdlmgfjndkfjnl");
-	writeFile ("filename",  "heehe");
+	cout << writeFile ("filename", 5, "well the we will see if this works?n");
+ 	cout << writeFile ("filename", 5, "and maybe it wont");
+	writeFile ("secondFile", 10, "&&&&&&&");
+	writeFile ("secondFile", 10, "++++flkmdlmgfjndkfjnl");
+	writeFile ("filename",  10, "heehe");
+	char* buffer = new char[10]; 
+	cout << readFile ("filename", 10, buffer);
 
-	deleteFile ("filename");
-	createFile ("thirsFile");
-	writeFile ("thirsFile", "another name");
+	//deleteFile ("filename");
+	//createFile ("thirdFile");
+	//writeFile ("thirsFile", 10,  "another name");
 	//myDisk.freeBlock(2);
 
 	List();
 
 	for (int i=0; i<10; i++) {
 		 myDisk.read(i,myBuffer);
-    		 // print comtents to the screen
+    		 // print contents to the screen
      		cout<<"Block "<< myDisk.getBlock(i)->getIndex()<<" : ";
      		for (int j=0; j<myBlockSize; j++) {
 			if (myBuffer->indexType)
