@@ -1,7 +1,7 @@
 /*
- Test program to show how the disk emulator API works.
- Author: D.M. Lyons
- Date: Spring 2017
+ File management system driver and file system module functions
+ Author: Raheema Kadwa
+ Date: Spring 2019
 
  c 2017 dml Fordham CIS
 */
