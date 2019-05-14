@@ -16,6 +16,8 @@
  comment. No warranty or support implied.
  
  c dmlyons 2012- 2017 Fordham CIS.
+ 
+ Raheema Kadwa | rkadwa@fordham.edu updated to implement index blocks on the disk
 */
 
 #include <iostream>
@@ -108,7 +110,6 @@ int DiskProcessType::write(int bnum, DiskBlockType *buffer){
    
   // do the data write
   else {
-	  cout << "Buffer index: " << buffer->getIndex() << endl;
   	if (buffer->data!=NULL && disk[bnum]->data!=NULL) {
 		for (int i=0; i<blockSize; i++){
             		disk[bnum]->data[i] = buffer->data[i];
