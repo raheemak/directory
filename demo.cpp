@@ -81,20 +81,15 @@ void deleteFile (string file){
 		int blockNo = directory[file];
 		int temp;
        		myDisk.read(directory[file],myBuffer);
-		cout << 1 <<endl;
-		cout << "Block number: " << blockNo <<endl;
 		for (int x=0; x < myBlockSize; x++){
 			cout << "x: " << x <<endl;
 			if (myBuffer->indeces[x]==NULL){
-				cout << "que"<<endl;
 				temp = myBuffer->getIndex();
                         	myDisk.freeBlock(temp);
 				freeSpace.add_node(temp);
 				break;
 			}	
                 	else{
-				cout << "here" <<endl;
-				cout << "Temp: " << temp << endl;
 				temp=myBuffer->indeces[x]->getIndex();
 			 	myDisk.freeBlock(temp);
 			 	freeSpace.add_node(temp);
@@ -278,8 +273,6 @@ int main(int argc, char **argv){
 		}
 		cout <<endl;
    	}
-
-	cout << "End of file/..." <<endl;	
 }	
 
 
