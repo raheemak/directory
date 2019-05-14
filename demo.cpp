@@ -288,8 +288,27 @@ vector<string> List(){
 	return list;
 }
 
+//Helper function for testing to print contents of disk 
+void printDisk(){
+  DiskBlockType *myBuffer = new DiskBlockType(myBlockSize, true);
+  
+  for (int i=0; i<10; i++) {
+                 myDisk.read(i,myBuffer);
+                 // print contents to the screen
+                cout<<"Block "<< myDisk.getBlock(i)->getIndex()<<" : ";
+                for (int j=0; j<myBlockSize; j++) {
+                        if (myBuffer->indexType)
+                                cout << myBuffer->indeces[j] << ", ";
+                        else
+                                cout << myBuffer ->data[j];
+                }
+                cout <<endl;
+        }
+}
+
 int main(int argc, char **argv){
-  	DiskBlockType *myBuffer = new DiskBlockType(myBlockSize, true); 
+	
+	DiskBlockType *myBuffer = new DiskBlockType(myBlockSize, true); 
 	createFile ("filename");
 	createFile ("secondFile");
 	cout << writeFile ("filename", 5, "well the we will see if this works?n");
@@ -307,27 +326,19 @@ int main(int argc, char **argv){
 
 	List();
 
-	for (int i=0; i<10; i++) {
-		 myDisk.read(i,myBuffer);
-    		 // print contents to the screen
-     		cout<<"Block "<< myDisk.getBlock(i)->getIndex()<<" : ";
-     		for (int j=0; j<myBlockSize; j++) {
-			if (myBuffer->indexType)
-				cout << myBuffer->indeces[j] << ", ";
-			else 
-				cout << myBuffer ->data[j];
-		}
-		cout <<endl;
-   	}
-
-	bool exit = false, debug;
+	bool exit = false, debug, passed;
 	string command; 
 	string filename;
-
-
+	string data;
+	char* dataBuffer;
+	int bufferSize=-1; 
 	cout << endl << endl << "------\nATOS FILE SYSTEM\n-----"<<endl;
 	cout << "Commands: CREATE/DELETE/READ/WRITE/LIST/STATS/HELP"<<endl;
 	
+	 cout << "Debug mode? This will print disk after each command you enter (Y/N):";
+         while (command != "Y" && command != "N")
+         	cin >> command;
+         debug = (command == "Y");
 	while (!exit){
 		cout << "Please enter a command: "; 
 		cin >> command;
@@ -336,26 +347,62 @@ int main(int argc, char **argv){
 			exit = true;
 			break;
 		}
-		cout << "Debug mode? This will print disk after each command you enter (Y/N):"; 
-		while (command != "Y" || command != "N")
-			cin >> command; 
-		debug = (command == 'Y');
 		else if (command == "CREATE"){
+			cout << "File name: "; 
+			cin >> command; 
+			createFile(command);
 		}
 		else if (command == "DELETE"){
-		}
-		else if (command == "READ"){
+			cout << "File name: ";
+                        cin >> command;
+                        deleteFile(command);
 		}
 		else if (command == "WRITE"){
+			cout << "File name: "; 
+			cin >> command; 
+			cout << "Data: "; 
+			cin >> data; 
+			dataBuffer = const_cast<char*>(data.c_str());
+			passed = (writeFile (command, myBlockSize,dataBuffer) > 0);
+		        if (passed)
+				dataBuffer = NULL;	
+		}
+		else if (command == "READ"){
+			cout << "File name: "; 
+			cin >> command; 
+			while (bufferSize<0){
+				cout << "No. bits you would like to read: ";
+				cin >> bufferSize; 
+			}dataBuffer = new char[bufferSize];
+			passed = (readFile (command, myBlockSize, dataBuffer)>=0);
+			cout << "passed: " << passed <<endl;	
+			if (passed){
+				for (int x=0; x < bufferSize; x++)
+				cout << dataBuffer[x];
+				cout << endl;
+				delete dataBuffer;// = NULL;
+			}
+			bufferSize = -1;
 		}
 		else if (command == "LIST"){
+			List();
 		}
 		else if (command == "STATS"){
+			cout << "File name: ";
+                        cin >> command;
+                        stats(command);
 		}
 		else if (command == "HELP"){
 		}
 		else {
 			cout << endl << "Please enter a valid command. Type 'HELP' for instructions."<<endl;
+		}
+
+		cout << endl;
+		if (debug){
+			cout << endl <<endl;
+			printDisk();
+			cout << endl <<endl;
 		}
 	}
 }	
