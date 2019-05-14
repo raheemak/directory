@@ -17,6 +17,8 @@
  comment. No warranty or support implied.
  
  c dmlyons 2012- 2016 Fordham CIS.
+ 
+ Raheema Kadwa - updated functions and disk to add index block (Spring 2019)
 */
 
 #ifndef _DISKPROCESS
@@ -55,7 +57,6 @@ class DiskBlockType {
   }
 
   ~DiskBlockType(){ // destructor frees the block
-    cout << "Index: " << indexLocation <<endl;
     if (&data!=NULL)
 	    delete data;
 
@@ -92,7 +93,6 @@ class DiskProcessType {
 
   ~DiskProcessType() { // clean up the disk nicely
     for (int i=0; i<numBlocks; i++){
-      	cout << i <<": " << (disk[i]==NULL)<< endl;
 	    if (disk[i]!=NULL && !disk[i]->indexType) // block was used
 	delete disk[i]; // so free it up
     }
@@ -107,7 +107,6 @@ class DiskProcessType {
 
   void freeBlock(int x){
 	disk[x]=NULL;
-	cout << "deleting...  " << x << endl;
   	delete disk[x];
   }
 
