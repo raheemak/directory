@@ -67,6 +67,8 @@ void createFile (string file){
 	else{
 		directory [file]= freeSpace.getNextBlock();
 		DiskBlockType *myBuffer = new DiskBlockType(myBlockSize, true);
+		myBuffer->setIndex (directory[file]);
+		cout << file << ": " << myBuffer->getIndex() <<endl;
 		myDisk.write (directory[file], myBuffer);
 	}
 }
@@ -75,9 +77,30 @@ void deleteFile (string file){
         if (directory.find (file)==directory.end())
                 cout << FILENOTFOUND;
         else{
-                directory [file]= freeSpace.getNextBlock();
                 DiskBlockType *myBuffer = new DiskBlockType(myBlockSize, true);
-        	
+		int blockNo = directory[file];
+		int temp;
+       		myDisk.read(directory[file],myBuffer);
+		cout << 1 <<endl;
+		cout << "Block number: " << blockNo <<endl;
+		for (int x=0; x < myBlockSize; x++){
+			cout << "x: " << x <<endl;
+			if (myBuffer->indeces[x]==NULL){
+				cout << "que"<<endl;
+				temp = myBuffer->getIndex();
+                        	myDisk.freeBlock(temp);
+				freeSpace.add_node(temp);
+				break;
+			}	
+                	else{
+				cout << "here" <<endl;
+				cout << "Temp: " << temp << endl;
+				temp=myBuffer->indeces[x]->getIndex();
+			 	myDisk.freeBlock(temp);
+			 	freeSpace.add_node(temp);
+			}
+			directory.erase(file);
+		}
 	}
 }
 
@@ -103,6 +126,7 @@ int addBlock(string file){
 	for (int i=0; i <myBlockSize; i++){
 		if (myBuffer->indeces[i]==0){
 			myBuffer->indeces[i]= myDisk.getBlock(next_int);
+			myBuffer->indeces[i]->setIndex(next_int);
 			myDisk.write(blockNo,myBuffer);
 			added=next_int;
 			break;
@@ -235,12 +259,17 @@ int main(int argc, char **argv){
 	writeFile ("secondFile", "++++flkmdlmgfjndkfjnl");
 	writeFile ("filename",  "heehe");
 
+	deleteFile ("filename");
+	createFile ("thirsFile");
+	writeFile ("thirsFile", "another name");
+	//myDisk.freeBlock(2);
+
 	List();
 
 	for (int i=0; i<10; i++) {
 		 myDisk.read(i,myBuffer);
     		 // print comtents to the screen
-     		cout<<"Block "<<i<<" : ";
+     		cout<<"Block "<< myDisk.getBlock(i)->getIndex()<<" : ";
      		for (int j=0; j<myBlockSize; j++) {
 			if (myBuffer->indexType)
 				cout << myBuffer->indeces[j] << ", ";
@@ -248,6 +277,9 @@ int main(int argc, char **argv){
 				cout << myBuffer ->data[j];
 		}
 		cout <<endl;
-   	}		
+   	}
 
-}
+	cout << "End of file/..." <<endl;	
+}	
+
+

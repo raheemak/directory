@@ -30,7 +30,7 @@ using namespace std;
  // never been accessed before
 bool DiskProcessType::createBlock(int blockNumber, bool indexType) {
   if (blockNumber<numBlocks)  {
-    disk[blockNumber] = new DiskBlockType(blockSize,indexType);
+    disk[blockNumber] = new DiskBlockType(blockSize,indexType); 
     numCreated++;
     return true;
   }
@@ -42,7 +42,7 @@ bool DiskProcessType::createBlock(int blockNumber, bool indexType) {
 
   // read a block from the disk. Will create the block data
   // if it did not exist yet
-  int DiskProcessType::read(int bnum, DiskBlockType *buffer){
+int DiskProcessType::read(int bnum, DiskBlockType *buffer){
   if (bnum<0 || bnum>=numBlocks) {
     cerr<<"DISK: Block number is outside bounds\n";
     return ERROR_RETURN;
@@ -92,36 +92,34 @@ int DiskProcessType::write(int bnum, DiskBlockType *buffer){
 
     return ERROR_RETURN;
   }
-
   if (disk[bnum]==NULL){ // not ceated yet
-  	  if (!createBlock(bnum, buffer->indexType)) // is it possible to create?
-     	 return ERROR_RETURN; // bad block number create request
+  	  if (createBlock(bnum, buffer->indexType)) // is it possible to create?
+     	disk[bnum]->setIndex (bnum);
+	  else 
+		  return ERROR_RETURN; // bad block number create request
   }
  // do the data write
-   if (buffer->indexType){
+  if (buffer->indexType){
 	for (int i=0; i<blockSize; i++){
                 disk[bnum]->indeces[i]=buffer->indeces[i];
-    }
+	}
     numReads++;
   }
-  
-  
+   
   // do the data write
   else {
+	  cout << "Buffer index: " << buffer->getIndex() << endl;
   	if (buffer->data!=NULL && disk[bnum]->data!=NULL) {
-    	for (int i=0; i<blockSize; i++){
-            disk[bnum]->data[i] = buffer->data[i];
+		for (int i=0; i<blockSize; i++){
+            		disk[bnum]->data[i] = buffer->data[i];
     }
     numReads++;
   }
-  	else cerr<<"DISK: Bad buffer pointers sent to write\n";
-	
-  }
-  
   // do logging if enabled
   if (logging)
     logfile<<"DISK: Write to block "<<bnum<<"\n";
   return 0;
+}
 }
 
 
@@ -137,7 +135,7 @@ bool DiskProcessType::enableLogging(string logfileName){
   return logging;
 }
 
-  // write out any disk stats collected. Goes to log if logging enabled
+  // write out any isk stats collected. Goes to log if logging enabled
   // otherwise no output.
 void DiskProcessType::writeStats() {
     logfile<< "DISK: block size "<<blockSize

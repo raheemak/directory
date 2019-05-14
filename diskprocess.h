@@ -33,7 +33,7 @@ class DiskBlockType {
   char *data;        //pointer to the data on the disk
   vector<DiskBlockType*> indeces;
   bool indexType;
-  
+  int indexLocation;
   
   DiskBlockType(int bsize, bool index) { // constructor makes the block
     indexType = index;
@@ -43,9 +43,22 @@ class DiskBlockType {
 	    for (int x =0 ; x < bsize; x++)indeces.push_back(NULL);
     data = new char[bsize];
     //for (int i; i<bsize; i++) data[i]='.';
+  	indexLocation=0;
   }
+
+  void setIndex(int x){
+	  indexLocation = x;
+  }
+
+  int getIndex(){
+	  return indexLocation;
+  }
+
   ~DiskBlockType(){ // destructor frees the block
-    delete data;
+    cout << "Index: " << indexLocation <<endl;
+    if (&data!=NULL)
+	    delete data;
+
   }
 };
 
@@ -68,7 +81,8 @@ class DiskProcessType {
   
  public:
   DiskProcessType(int bsize, int bnum) {// mke the disk
-    blockSize=bsize;
+   
+	  blockSize=bsize;
     numBlocks=bnum;
     numCreated=numReads=numWrites=currentBlock=0;
     for (int i=0; i<numBlocks; i++){
@@ -77,9 +91,11 @@ class DiskProcessType {
   };
 
   ~DiskProcessType() { // clean up the disk nicely
-    for (int i=0; i<numBlocks; i++)
-      if (disk[i]!=NULL) // block was used
+    for (int i=0; i<numBlocks; i++){
+      	cout << i <<": " << (disk[i]==NULL)<< endl;
+	    if (disk[i]!=NULL && !disk[i]->indexType) // block was used
 	delete disk[i]; // so free it up
+    }
     if (logging) {
       logfile << "DISK: Terminating.\n";
       logfile << "DISK: Blocks created were "<<numCreated<<" of total "
@@ -87,6 +103,12 @@ class DiskProcessType {
 	      <<100*float(numCreated)/float(numBlocks)<<" %\n";
       logfile.close();
     }
+  }
+
+  void freeBlock(int x){
+	disk[x]=NULL;
+	cout << "deleting...  " << x << endl;
+  	delete disk[x];
   }
 
   int getBlockSize() { return blockSize; }
